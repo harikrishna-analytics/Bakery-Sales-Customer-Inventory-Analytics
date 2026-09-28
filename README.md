@@ -1,305 +1,114 @@
 # 🍞 Bakery Sales, Customer & Inventory Analytics
 
-## 📌 Project Overview
+### End-to-End Data Analytics & Business Intelligence Project
 
-An end-to-end **Data Analytics and Business Intelligence project** built to analyze bakery sales, customers, promotions, inventory, profitability, and waste.
+An end-to-end analytics project covering **data preparation, SQL analysis, DAX modelling, Power BI dashboards, and business insights**.
 
-The project follows a complete analytical workflow:
-
-**Python → SQL → DAX → Power BI → Business Insights → Recommendations**
-
-Rather than using Power BI only for visualization, the project starts with data preparation and exploratory analysis, moves into database-level validation and business analysis using **PostgreSQL and Microsoft SQL Server**, creates a reusable **DAX semantic layer**, and finally communicates the validated results through Power BI dashboards.
+**Python → SQL → DAX → Power BI → Business Insights**
 
 ---
 
 ## 🎯 Business Objective
 
-The objective is to understand:
+Analyze bakery **sales, customers, promotions, inventory, profitability, and waste** to identify actionable business patterns.
 
-* What drives bakery sales and revenue?
-* Which categories perform strongly?
-* How do quantity sold and profitability relate?
-* How do seasonality and festivals affect demand?
-* What is the relationship between promotions and business performance?
-* How does stock availability relate to sales?
-* Where are waste and expiry risks occurring?
+Key questions include:
+
+* Which categories drive revenue and sales?
+* How do seasonality, festivals, and promotions affect performance?
+* Where are inventory and waste risks occurring?
+* How do sales and profitability relate?
 * What customer patterns can be identified?
-* How can the analysis support better inventory, sales and profitability decisions?
 
 ---
 
-# 🔄 End-to-End Analytical Workflow
+## 📊 Dataset
+
+| Metric       |             Details |
+| ------------ | ------------------: |
+| Transactions |              16,569 |
+| Customers    |               2,173 |
+| Products     |                  35 |
+| Categories   |                  10 |
+| Stores       |                   3 |
+| Employees    |                  20 |
+| Period       | Jan 2023 – Dec 2024 |
+| Columns      |                  41 |
+
+**Data grain:** One transaction/product record per row.
+
+---
+
+# 🔄 Analytical Workflow
 
 ```text
 Raw Dataset
      ↓
-┌─────────────────────────────┐
-│ 1. Python                   │
-│ Cleaning + EDA + Discovery  │
-└─────────────────────────────┘
+🐍 Python
+Cleaning + EDA + Discovery
      ↓
-┌─────────────────────────────┐
-│ 2. SQL                      │
-│ Validation + Analysis       │
-│ PostgreSQL + SQL Server     │
-└─────────────────────────────┘
+🗄️ SQL
+PostgreSQL + SQL Server
+Validation + Analysis
      ↓
-┌─────────────────────────────┐
-│ 3. DAX                     │
-│ Semantic / Business Layer   │
-└─────────────────────────────┘
+📐 DAX
+Semantic / Business Layer
      ↓
-┌─────────────────────────────┐
-│ 4. Power BI                 │
-│ Dashboard + Storytelling    │
-└─────────────────────────────┘
+📊 Power BI
+Dashboard + Storytelling
      ↓
-┌─────────────────────────────┐
-│ 5. Business Insights        │
-│ Recommendations             │
-└─────────────────────────────┘
+💡 Business Insights
+Recommendations
 ```
 
-### Project philosophy
-
-> **Python discovers → SQL validates & explains → DAX models → Power BI communicates → Business Insights guide recommendations.**
+> **Python discovers → SQL validates & explains → DAX models → Power BI communicates → Insights guide decisions.**
 
 ---
 
-# 📊 Dataset
+# 1️⃣ Python — Data Preparation & EDA
 
-The project uses a synthetic bakery business dataset containing:
+**Purpose:** Data inspection, cleaning, quality checks and exploratory analysis.
 
-| Attribute    |             Details |
-| ------------ | ------------------: |
-| Transactions |              16,569 |
-| Customers    |               2,173 |
-| Stores       |                   3 |
-| Employees    |                  20 |
-| Products     |                  35 |
-| Categories   |                  10 |
-| Time Period  | Jan 2023 – Dec 2024 |
-| Columns      |                  41 |
+### Key Activities
 
-The validated analytical grain is a **transaction/product record per row**.
-
----
-
-# 1️⃣ Python — Data Preparation & Exploration
-
-## Purpose
-
-Python is used as the **data preparation and analytical discovery layer**.
-
-The objective is to understand the dataset before moving into database-level analysis.
-
-### Main activities
-
-* Dataset inspection
-* Structure and schema validation
-* Data-type checks
-* Missing-value analysis
-* Duplicate detection
-* Transaction ID validation
+* Dataset and schema inspection
+* Missing-value and duplicate checks
+* Transaction validation
 * Data cleaning
-* Exploratory Data Analysis
-* Category-level analysis
-* Monthly revenue analysis
-* Initial pattern discovery
-* Analytical question generation
+* Category analysis
+* Monthly trend analysis
+* Pattern discovery
 
-### Python libraries
+### Libraries
 
-```text
-Pandas
-NumPy
-Matplotlib
-Seaborn
-```
-
-### Example
-
-```python
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Load dataset
-df = pd.read_csv("bakery_sales.csv")
-
-# Inspect structure
-print(df.shape)
-print(df.columns.tolist())
-print(df.info())
-
-# Data quality checks
-print(df.isnull().sum())
-print("Duplicate rows:", df.duplicated().sum())
-print(
-    "Duplicate transaction IDs:",
-    df["transaction_id"].duplicated().sum()
-)
-
-# Category-level analysis
-category_summary = (
-    df.groupby("category", as_index=False)
-      .agg(
-          revenue=("total_bill", "sum"),
-          quantity_sold=("quantity", "sum"),
-          profit=("profit", "sum"),
-          waste_cost=("waste_cost", "sum")
-      )
-      .sort_values("revenue", ascending=False)
-)
-
-print(category_summary)
-
-# Monthly revenue
-df["transaction_date"] = pd.to_datetime(
-    df["transaction_date"]
-)
-
-df["year_month"] = (
-    df["transaction_date"]
-    .dt.to_period("M")
-    .astype(str)
-)
-
-monthly_revenue = (
-    df.groupby("year_month", as_index=False)["total_bill"]
-      .sum()
-)
-
-print(monthly_revenue)
-```
-
-### Python's role in the project
-
-Python is intentionally not used as the final reporting layer.
-
-Its role is:
-
-```text
-Raw Data
-   ↓
-Inspection
-   ↓
-Cleaning
-   ↓
-EDA
-   ↓
-Pattern Discovery
-   ↓
-Business Questions
-```
-
-The important findings are then reproduced and validated using SQL.
+`Pandas` · `NumPy` · `Matplotlib` · `Seaborn`
 
 ---
 
-# 2️⃣ SQL — Data Quality, Analysis & Interpretation
+# 2️⃣ SQL — Analysis & Interpretation
 
-SQL is the **analytical foundation** of the project.
+Implemented using **PostgreSQL and Microsoft SQL Server / T-SQL**.
 
-The same business dataset was implemented in both:
-
-* PostgreSQL
-* Microsoft SQL Server / T-SQL
-
-This demonstrates cross-platform SQL capability and transferable analytical logic.
-
----
-
-## 🐘 PostgreSQL
-
-PostgreSQL was used for:
+### PostgreSQL
 
 * Data management
-* Data cleaning
-* Data-quality validation
-* Transformation
+* Cleaning & validation
 * Analytical SQL
-* Business analysis
+* Transformations
 
-Database:
+### SQL Server / T-SQL
 
-```text
-bakerysalespgdb
-```
-
-Table:
-
-```text
-bakery_sales
-```
-
----
-
-## 🪟 Microsoft SQL Server
-
-SQL Server / T-SQL was used for:
-
-* Data management
-* Data validation
 * Business analysis
 * Advanced SQL
-* Reusable analytical logic
-* Interpretation of business questions
-
-Database:
-
-```text
-bakerysalesdb
-```
-
-Table:
-
-```text
-bakery_sales
-```
-
----
-
-## SQL Analysis Areas
-
-### Data Quality
-
-* Null checks
-* Duplicate checks
-* Transaction ID validation
-* Date validation
-* Expiry-date analysis
-* Data consistency checks
-
-### Sales Analysis
-
-* Revenue
-* Quantity sold
-* Transactions
-* Average order value
-* Category performance
-* Monthly trends
-* Peak selling periods
-
-### Advanced SQL
-
-* CTEs
-* Joins
-* Subqueries
-* Window functions
-* Ranking
-* Aggregations
-* Views
-* Stored procedures
-* Contribution analysis
+* Ranking & contribution analysis
+* Reusable views / procedures
 * Time-based analysis
 
----
+### SQL Concepts
 
-## SQL Business Question Framework
+`CTEs` · `Joins` · `Subqueries` · `Window Functions` · `Aggregations` · `Ranking` · `Views` · `Stored Procedures`
 
-Each analytical problem follows:
+### Analytical Framework
 
 ```text
 Business Question
@@ -313,46 +122,31 @@ Interpretation
 Business Implication
 ```
 
-Example:
-
-```text
-Which categories generate the highest revenue?
-            ↓
-SQL aggregation + ranking
-            ↓
-Category-level revenue result
-            ↓
-Interpret the ranking
-            ↓
-Identify categories requiring attention
-```
-
-This makes SQL an analytical reasoning layer rather than simply a query-writing exercise.
-
 ---
 
-# 3️⃣ DAX — Semantic & Business Calculation Layer
+# 3️⃣ DAX — Semantic Layer
 
-After SQL validation, DAX is used to create reusable Power BI business measures.
+Reusable Power BI measures for:
 
-## Core KPIs
+* Revenue
+* Quantity Sold
+* Transactions
+* AOV
+* Category Ranking
+* Contribution %
+* MoM / YoY / YTD
+* Dynamic Top-N
+* Dynamic KPI Selection
+
+Example:
 
 ```DAX
 Total Revenue =
 SUM(bakery_sales[total_bill])
-```
 
-```DAX
-Total Quantity Sold =
-SUM(bakery_sales[quantity])
-```
-
-```DAX
 Total Transactions =
 DISTINCTCOUNT(bakery_sales[transaction_id])
-```
 
-```DAX
 Average Order Value =
 DIVIDE(
     [Total Revenue],
@@ -360,160 +154,23 @@ DIVIDE(
 )
 ```
 
-```DAX
-Average Selling Price =
-DIVIDE(
-    [Total Revenue],
-    [Total Quantity Sold]
-)
-```
-
 ---
 
-## Category Ranking
+# 4️⃣ Power BI — Dashboard
 
-```DAX
-Category Revenue Rank =
-RANKX(
-    ALL(bakery_sales[category]),
-    [Total Revenue],
-    ,
-    DESC,
-    DENSE
-)
-```
+### Dashboard Story
 
-## Category Contribution
+**Availability → Sales → Profitability → Waste**
 
-```DAX
-Category Contribution % =
-DIVIDE(
-    [Total Revenue],
-    CALCULATE(
-        [Total Revenue],
-        ALL(bakery_sales[category])
-    )
-)
-```
+### Strategic Slicers
 
----
+`Season` · `Gender` · `Festival` · `Promotion Type`
 
-## Time Intelligence
+### Core KPIs
 
-The project includes:
+`Stock Availability` · `Units Sold` · `Profit` · `Waste Cost`
 
-* Previous Month Revenue
-* MoM Revenue Change
-* MoM Revenue %
-* Previous Year Revenue
-* YoY Revenue Change
-* YoY Revenue %
-* YTD Revenue
-
-Example:
-
-```DAX
-Previous Month Revenue =
-CALCULATE(
-    [Total Revenue],
-    DATEADD(
-        DateTable[Date],
-        -1,
-        MONTH
-    )
-)
-```
-
-```DAX
-YoY Revenue % =
-DIVIDE(
-    [YoY Revenue Change],
-    [Previous Year Revenue]
-)
-```
-
----
-
-## Dynamic Top-N
-
-The project includes a disconnected Top-N selection table:
-
-```text
-5
-10
-15
-```
-
-The user can dynamically change the number of categories displayed in ranking visuals.
-
----
-
-## Dynamic KPI Selection
-
-The project also includes a dynamic KPI selector for:
-
-```text
-Revenue
-Quantity
-Transactions
-AOV
-```
-
-This allows the dashboard to change analytical focus without creating unnecessary duplicate visuals.
-
----
-
-# 4️⃣ Power BI — Visualization & Business Storytelling
-
-Power BI is used as the final **communication and decision-support layer**.
-
-The dashboard is not designed simply as a collection of charts.
-
-Each visual is connected to an analytical question or business decision.
-
----
-
-# 📊 Final Dashboard Story
-
-The final dashboard direction focuses on:
-
-```text
-Availability
-      ↓
-Sales
-      ↓
-Profitability
-      ↓
-Waste
-```
-
-## Strategic Slicers
-
-The final dashboard uses:
-
-* Season
-* Gender
-* Festival
-* Promotion Type
-
-These provide business-oriented segmentation rather than relying only on generic date filters.
-
----
-
-## Core KPIs
-
-The final dashboard emphasizes:
-
-* Stock Availability
-* Units Sold
-* Profit
-* Waste Cost
-
-This allows the user to move from operational availability to commercial performance and finally to profitability and waste.
-
----
-
-# 🧩 Power BI Data Model
+### Data Model
 
 ```text
                  DateTable
@@ -524,251 +181,69 @@ This allows the user to move from operational availability to commercial perform
                     │
         ┌───────────┼───────────┐
         ↓           ↓           ↓
-     Sales       Customer    Operations
+      Sales      Customer    Operations
      Analysis    Analysis    / Inventory
-        │           │           │
-        └───────────┼───────────┘
+                    │
                     ↓
-              DAX Measures
-
-
-TopN Selection ──→ Disconnected Selector
-
-KPI Selection ──→ Disconnected Selector
-```
-
-### Core Power BI tables
-
-```text
-bakery_sales
-DateTable
-TopN Selection
-KPI Selection
-```
-
-Relationship:
-
-```text
-DateTable[Date]
-       1
-       ↓
-bakery_sales[transaction_date]
-       *
+               DAX Measures
 ```
 
 ---
 
-# 5️⃣ Business Insights & Recommendations
+# 5️⃣ 💡 Business Insights
 
-The final stage converts validated analytical findings into business actions.
+Analysis focuses on:
 
-The project uses the following framework:
+* Sales & category performance
+* Seasonal and festival demand
+* Promotion performance
+* Inventory availability
+* Waste & expiry risk
+* Profitability
+* Customer patterns
 
-```text
-Finding
-   ↓
-Evidence
-   ↓
-Interpretation
-   ↓
-Business Impact
-   ↓
-Recommendation
-   ↓
-KPI to Monitor
-```
-
-## Analytical Areas
-
-### 🥐 Sales & Category Performance
-
-Identify high-performing and low-performing categories using:
-
-* Revenue
-* Units sold
-* Profit
-* Contribution %
-
-### 🎉 Seasonal & Festival Demand
-
-Analyze demand patterns across:
-
-* Seasons
-* Festivals
-* Time periods
-
-Use historical patterns to support production and inventory planning.
-
-### 📢 Promotion Performance
-
-Compare promotional and non-promotional performance using:
-
-* Revenue
-* Units sold
-* Profit
-* Promotion type
-
-Promotions should be evaluated based on measured business impact rather than revenue alone.
-
-### 📦 Inventory Availability
-
-Use stock availability and sales patterns to identify:
-
-* High-demand periods
-* Potential stock shortages
-* Availability issues
-
-### 🗑️ Waste & Expiry Risk
-
-Analyze:
-
-* Unsold units
-* Waste cost
-* Expiry risk
-* Production
-* Sales
-
-This can help identify areas where production or replenishment may need adjustment.
-
-### 💰 Profitability
-
-Revenue alone does not determine business performance.
-
-The project evaluates:
+### Recommendation Framework
 
 ```text
-Revenue
-+
-Units Sold
-+
-Profit
-+
-Waste Cost
-```
-
-This helps identify situations such as high sales volume but comparatively weaker profitability.
-
-### 👥 Customer Patterns
-
-Customer attributes such as:
-
-* Customer segment
-* Gender
-* Loyalty membership
-* Rating
-
-can be analyzed descriptively to identify patterns.
-
-The analysis does not assume that demographic attributes cause customer behavior.
-
----
-
-# 🧱 Data Structure
-
-Main fields include:
-
-```text
-transaction_id
-transaction_date
-transaction_time
-customer_id
-customer_age
-customer_gender
-product
-category
-quantity
-unit_price
-discount_percentage
-discount_amount
-selling_price
-total_bill
-payment_method
-weather
-temperature
-season
-day_of_week
-weekend
-festival
-store_id
-employee_id
-shelf_life_days
-manufacturing_date
-expiry_date
-stock_available
-units_produced
-units_sold
-unsold_units
-expiry_risk
-promotion_applied
-promotion_type
-promotion_score
-customer_rating
-customer_segment
-loyalty_member
-profit
-waste_cost
-recommended_product
-recommended_discount
+Finding → Evidence → Interpretation
+        → Business Impact → Recommendation → KPI
 ```
 
 ---
 
 # 🛠️ Technology Stack
 
-| Layer            | Technology         | Purpose                           |
-| ---------------- | ------------------ | --------------------------------- |
-| Data Preparation | Python             | Cleaning & EDA                    |
-| Analysis         | PostgreSQL         | Data management & analytical SQL  |
-| Analysis         | SQL Server / T-SQL | Advanced SQL & business analysis  |
-| Semantic Layer   | DAX                | Business calculations             |
-| Visualization    | Power BI           | Interactive dashboards            |
-| Documentation    | Notion             | Project reasoning & documentation |
-| Portfolio        | GitHub             | Code & project presentation       |
-| File Management  | SharePoint         | Datasets & project assets         |
+| Area              | Tools                         |
+| ----------------- | ----------------------------- |
+| Data Preparation  | Python, Pandas, NumPy         |
+| Database Analysis | PostgreSQL, SQL Server, T-SQL |
+| Analytics         | Advanced SQL                  |
+| Semantic Layer    | DAX                           |
+| Visualization     | Power BI                      |
+| Documentation     | Notion                        |
+| Project Assets    | SharePoint                    |
+| Portfolio         | GitHub                        |
 
 ---
 
-# 📁 Recommended Repository Structure
+# 📁 Repository Structure
 
 ```text
 Bakery-Sales-Customer-Inventory-Analytics/
 │
 ├── README.md
-│
-├── data/
-│   └── README.md
-│
 ├── python/
-│   ├── 01_data_cleaning_eda.ipynb
-│   └── README.md
-│
+│   └── 01_data_cleaning_eda.ipynb
 ├── sql/
-│   │
 │   ├── postgresql/
-│   │   ├── 01_data_quality.sql
-│   │   ├── 02_sales_analysis.sql
-│   │   ├── 03_customer_analysis.sql
-│   │   ├── 04_product_analysis.sql
-│   │   └── 05_advanced_analysis.sql
-│   │
 │   └── sql_server/
-│       ├── 01_data_quality.sql
-│       ├── 02_sales_analysis.sql
-│       ├── 03_customer_analysis.sql
-│       ├── 04_product_analysis.sql
-│       └── 05_advanced_analysis.sql
-│
 ├── dax/
 │   └── measures.md
-│
 ├── powerbi/
-│   ├── screenshots/
-│   └── README.md
-│
+│   └── screenshots/
 ├── insights/
 │   ├── business_insights.md
 │   └── recommendations.md
-│
 └── docs/
     ├── data_dictionary.md
     ├── data_structure.md
@@ -777,226 +252,50 @@ Bakery-Sales-Customer-Inventory-Analytics/
 
 ---
 
-# 🔍 Data Quality & Validation
+# ⭐ Skills Demonstrated
 
-The project includes validation at multiple stages.
-
-### Python
-
-```text
-Missing values
-Duplicate rows
-Duplicate transaction IDs
-Data types
-Basic consistency
-```
-
-### SQL
-
-```text
-Null validation
-Duplicate validation
-Date validation
-Expiry validation
-Business-rule checks
-Cross-checking analytical results
-```
-
-### Power BI
-
-Major dashboard metrics are intended to be reconciled against SQL results.
-
-Examples:
-
-```text
-Total Revenue
-Total Quantity Sold
-Total Transactions
-AOV
-Category Revenue
-Monthly Revenue
-Profit
-Waste Cost
-```
+**Python · SQL · PostgreSQL · SQL Server · T-SQL · Advanced SQL · DAX · Power BI · Data Quality · Data Validation · Data Modelling · Business Analysis · Data Storytelling**
 
 ---
 
-# 🔁 Cross-Platform SQL Approach
+# 💼 Interview Summary
 
-One of the key features of this project is implementing analytical logic across both:
-
-```text
-PostgreSQL
-     +
-Microsoft SQL Server
-```
-
-The purpose is not simply to duplicate queries.
-
-It demonstrates that the underlying business logic can be transferred across database environments while accounting for differences in SQL syntax and functions.
+> Built an end-to-end bakery analytics solution using **Python for exploration, PostgreSQL and SQL Server for analytical SQL, DAX for reusable business measures, and Power BI for interactive reporting**, translating validated analysis into insights around sales, inventory, profitability and waste.
 
 ---
 
-# 💼 Interview Explanation
+# 👤 About Me
 
-> **“I built an end-to-end bakery analytics project where I first used Python for data preparation, quality checks and exploratory analysis. I then implemented the dataset in PostgreSQL and Microsoft SQL Server for data validation, business analysis and advanced SQL. I converted the validated analytical logic into reusable DAX measures and then built Power BI dashboards to communicate the results. The final dashboard connects availability, sales, profitability and waste, and the project concludes with evidence-based business insights and recommendations.”**
-
----
-
-# ⭐ What This Project Demonstrates
-
-### Technical Skills
-
-* Python
-* Pandas
-* NumPy
-* Matplotlib
-* Seaborn
-* PostgreSQL
-* Microsoft SQL Server
-* T-SQL
-* Advanced SQL
-* DAX
-* Power BI
-* Data modelling
-* Data validation
-* Data quality
-* Business intelligence
-
-### Analytical Skills
-
-* Exploratory Data Analysis
-* Business-question-driven analysis
-* Data interpretation
-* KPI development
-* Trend analysis
-* Ranking
-* Contribution analysis
-* Time intelligence
-* Profitability analysis
-* Inventory analysis
-* Waste analysis
-* Business recommendations
-
-### Professional Skills
-
-* Analytical storytelling
-* Requirement-to-insight thinking
-* Cross-platform SQL
-* Documentation
-* Data-quality mindset
-* Business-oriented dashboard design
-
----
-
-# 🚀 Final Project Architecture
-
-```text
-                    RAW DATA
-                       │
-                       ▼
-              ┌────────────────┐
-              │    PYTHON      │
-              │ Cleaning + EDA │
-              └────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │      SQL       │
-              │ PostgreSQL +   │
-              │ SQL Server     │
-              │ Analysis +     │
-              │ Interpretation │
-              └────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │      DAX       │
-              │ Semantic Layer │
-              └────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │   POWER BI     │
-              │ Visualization  │
-              │ & Storytelling │
-              └────────────────┘
-                       │
-                       ▼
-              ┌────────────────┐
-              │    INSIGHTS    │
-              │ & RECOMMEND.   │
-              └────────────────┘
-```
-
----
-
-# 📌 Portfolio Positioning
-
-This project is designed to demonstrate that **Power BI is the final presentation layer of an analytical workflow, not the entire workflow itself**.
-
-The core approach is:
-
-```text
-Business Question
-       ↓
-Python Exploration
-       ↓
-SQL Analysis
-       ↓
-SQL Interpretation
-       ↓
-DAX Calculation
-       ↓
-Power BI Visualization
-       ↓
-Business Insight
-       ↓
-Recommendation
-```
-
-The project therefore demonstrates an end-to-end **Data Analyst / BI Analyst workflow** combining technical analysis with business interpretation.
-
----
-
-## 👤 Author
-
-**Hanraj Hari Krishna**
+### **Hanraj Hari Krishna**
 
 **Data Analyst | Data Management | Data Quality & Governance | SQL | Power BI | Advanced Excel**
 
-* LinkedIn: linkedin.com/in/hari-krishna-178397145
-* GitHub: github.com/harikrishna-analytics
-* Email: [hanrajharikrishna@gmail.com](mailto:hanrajharikrishna@gmail.com)
+📍 Hyderabad, India
+
+📧 **[hanrajharikrishna@gmail.com](mailto:hanrajharikrishna@gmail.com)**
+
+🔗 **LinkedIn:** [linkedin.com/in/hari-krishna-178397145](https://www.linkedin.com/in/hari-krishna-178397145)
+
+💻 **GitHub:** [github.com/harikrishna-analytics](https://github.com/harikrishna-analytics)
 
 ---
 
 ## 📌 Project Status
 
-**Core analytical project completed.**
+**Core analytical project completed ✅**
 
-Completed:
-
-* ✅ Python data preparation & EDA
-* ✅ PostgreSQL implementation
-* ✅ SQL Server / T-SQL implementation
-* ✅ Data-quality validation
-* ✅ Business-question-driven SQL analysis
+* ✅ Python Data Preparation & EDA
+* ✅ PostgreSQL Analysis
+* ✅ SQL Server / T-SQL Analysis
+* ✅ Data Quality Validation
 * ✅ Advanced SQL
-* ✅ DAX semantic layer
-* ✅ Power BI dashboard construction
-* ✅ Strategic slicers and KPIs
-* ✅ End-to-end analytical architecture
-
-Final portfolio activities:
-
-* ⏳ SQL ↔ Power BI reconciliation evidence
-* ⏳ Final validated numeric business insights
-* ⏳ Evidence-based recommendation table
-* ⏳ GitHub SQL organization
-* ⏳ Dashboard screenshots
-* ⏳ Final repository packaging
+* ✅ DAX Semantic Layer
+* ✅ Power BI Dashboard
+* ✅ Business Analysis Framework
+* 🔄 Final portfolio packaging
 
 ---
+
+### 🚀 Project Philosophy
 
 > **Python discovers. SQL validates. DAX models. Power BI communicates. Business insights drive action.**
